@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>chatterbox</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- dependencies -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="bower_components/underscore/underscore.js"></script>
+    <script>
+      // YOU DO NOT NEED TO EDIT THIS CODE
+      if (!/(&|\?)username=/.test(window.location.search)) {
+        var newSearch = window.location.search;
+        if (newSearch !== '' & newSearch !== '?') {
+          newSearch += '&';
+        }
+        newSearch += 'username=' + (prompt('What is your name?') || 'anonymous');
+        window.location.search = newSearch;
+      }
+    </script>
+    <!-- your scripts -->
+    <script src="env/config.js"></script>
+    <script src="scripts/app.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+          $('#comment').keypress(function(e){
+            if(e.which == 13){
+              app.handleSubmit();
+              $(this).val('').focus();
+              return false;
+            }
+          });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="main" class="container-fluid">
+      <h1 id="title">chatterbox</h1>
+      <!-- Your HTML goes here! -->
+
+      <br>
+      
+      <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          Select Room
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+          <li><a onclick=app.selectRoom(this.id) id="allrooms" href="#">All</a></li>
+        </ul>
+      </div>
+
+      <br>
+
+      <div class="input-group">
+        <input class="form-control" type="text" id="createroom" placeholder="Enter new roomname">
+        <span class="input-group-btn">
+          <button class="btn btn-default" onclick="app.createRoom()">Submit</button>
+        </span>
+      </div>
+
+      <br>
+      
+        <div class="form-group">
+          <textarea class="form-control" rows="3" id="comment" placeholder="Enter new message" autofocus></textarea>
+        </div>
+        <button class="btn btn-default" onclick="app.handleSubmit()" style="float:right">Submit</button>
+      
+    </div>
+    <div id="chats" class="container-fluid"></div>
+  </body>
+</html>
