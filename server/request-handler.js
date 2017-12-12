@@ -1,14 +1,10 @@
 var fs = require('fs');
-
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
-
-// Results array with message objects
-var results = [{'username': 'Hackerman', 'text': 'This is a test message', 'roomname': 'Generic Room', 'createdAt': new Date()}];
 
 var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
@@ -24,11 +20,21 @@ var requestHandler = function(request, response) {
   }
   
   // Check endpoint and method 
-  if (request.url.slice(0, 16) === '/classes/message') {
+  if (request.url.slice(0, 17) === '/classes/messages') {
+    // Send get results
     if (request.method === 'GET') {
-      response.writeHead(200, headers);
-      response.end(JSON.stringify({ 'results': results.reverse() }));
+      // Wait for results from readFile before responding
+      fs.readFile('messages.txt', (err, data)=> {
+        if (err) {
+          throw err;
+        }
+        var results = JSON.parse(data);
+        response.writeHead(200, headers);
+        response.end(JSON.stringify({ 'results': results.reverse() }));
+      });
+    // Post data to file and return results
     } else if (request.method === 'POST') {
+      var messages;
       var message;
       request.on('data', (data) => {
         message = JSON.parse(data);
@@ -36,9 +42,21 @@ var requestHandler = function(request, response) {
           message['roomname'] = undefined;
         }
         message['createdAt'] = new Date();
-        results.push(message);
-        response.writeHead(201, headers);
-        response.end(JSON.stringify({ 'results': results.reverse() }));
+        // Push new data to results
+        fs.readFile('messages.txt', (err, data) => {
+          if (err) {
+            throw err;
+          }
+          messages = JSON.parse(data);
+          messages.push(message);
+          fs.writeFile('messages.txt', JSON.stringify(messages), (err) => {
+            if (err) {
+              throw err;
+            }
+            response.writeHead(201, headers);
+            response.end(JSON.stringify({ 'results': messages.reverse() }));
+          });
+        });
       });
     }
   } else {
