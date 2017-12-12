@@ -29,5 +29,6 @@
     "presets": [
       "es2015"
     ]
-  }
+  },
+  "dependencies": {}
 }
