@@ -3,8 +3,6 @@ var rh = require('./request-handler');
 
 var port = process.env.PORT || 3000;
 
-// var ip = '127.0.0.1';
-
 http.createServer(rh.requestHandler).listen(port);
 
-// console.log('Listening on http://' + ip + ':' + port);
+console.log('Listening on port ' + port);
