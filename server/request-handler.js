@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -11,15 +13,22 @@ var results = [{'username': 'Hackerman', 'text': 'This is a test message', 'room
 var requestHandler = function(request, response) {
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   
-  // The outgoing status.
-  var statusCode = 200;
+  // Default headers
+  var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
+
+  // Serve client html
+  if (request.url === '/') {
+    response.writeHead(200, headers);
+    response.end('Client goes here!');
+  }
   
   // Check endpoint and method 
   if (request.url.slice(0, 16) === '/classes/message') {
     if (request.method === 'GET') {
-
+      response.writeHead(200, headers);
+      response.end(JSON.stringify({ 'results': results.reverse() }));
     } else if (request.method === 'POST') {
-      statusCode = 201;
       var message;
       request.on('data', (data) => {
         message = JSON.parse(data);
@@ -28,18 +37,16 @@ var requestHandler = function(request, response) {
         }
         message['createdAt'] = new Date();
         results.push(message);
+        response.writeHead(201, headers);
+        response.end(JSON.stringify({ 'results': results.reverse() }));
       });
     }
   } else {
-    statusCode = 404;
+    response.writeHead(404, headers);
+    response.end();
   }
 
-  // Set headers
-  var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'application/json';
-  response.writeHead(statusCode, headers);
 
-  response.end(JSON.stringify({ 'results': results.reverse() }));
 };
 
 exports.requestHandler = requestHandler;
