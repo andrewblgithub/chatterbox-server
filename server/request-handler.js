@@ -58,6 +58,9 @@ var requestHandler = function(request, response) {
           });
         });
       });
+    } else if (request.method === 'OPTIONS') {
+      response.writeHead(200, defaultCorsHeaders);
+      response.end();
     }
   } else {
     response.writeHead(404, headers);
