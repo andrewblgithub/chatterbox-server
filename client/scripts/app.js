@@ -53,7 +53,7 @@ app.createRoom = () => {
   app.selectRoom(room);
 };
 
-app.server = 'http://localhost:3000/classes/messages';
+app.server = 'https://chatterbox-chat.herokuapp.com/classes/messages';
 
 app.send = (message) => {
   $.ajax({
