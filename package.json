@@ -15,7 +15,7 @@
     "test": "mocha server/spec",
     "test:es6": "mocha --compilers js:babel-register server/spec",
     "lint": "eslint ./",
-    "postinstall": "bower install"
+    "postinstall": "cd client && bower install && cd.."
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
