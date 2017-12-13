@@ -25,7 +25,9 @@ var requestHandler = function(request, response) {
   ) {
     var file = './client' + request.url;
     fs.readFile(file, function(err, data) {
-      data = data.toString();
+      if (data) {
+        data = data.toString();
+      }
       var headers = Object.assign({}, defaultCorsHeaders);
       if (
         request.url === '/styles/styles.css' ||
