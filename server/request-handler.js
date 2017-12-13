@@ -1,4 +1,5 @@
 var fs = require('fs');
+
 var defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -13,10 +14,41 @@ var requestHandler = function(request, response) {
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'application/json';
 
+  // Pretty hacky, but routes for client dependencies
+  if (
+    request.url === '/styles/styles.css' ||
+    request.url === '/bower_components/bootstrap/dist/css/bootstrap.css' ||
+    request.url === '/bower_components/bootstrap/dist/js/bootstrap.js' ||
+    request.url === '/bower_components/jquery/dist/jquery.js' ||
+    request.url === '/bower_components/underscore/underscore.js' ||
+    request.url === '/scripts/app.js'
+  ) {
+    var file = './client' + request.url;
+    fs.readFile(file, function(err, data) {
+      data = data.toString();
+      var headers = Object.assign({}, defaultCorsHeaders);
+      if (
+        request.url === '/styles/styles.css' ||
+        request.url === '/bower_components/bootstrap/dist/css/bootstrap.css'
+      ) {
+        headers['Content-Type'] = 'text/css';
+      } else {
+        headers['Content-Type'] = 'text/javascript';
+      }
+      response.writeHead(200, headers);
+      response.end(data);
+    });
+  }
+
   // Serve client html
-  if (request.url === '/') {
-    response.writeHead(200, headers);
-    response.end('Client goes here!');
+  if (request.url === '/' || request.url.slice(0, 11) === '/?username=') {
+    fs.readFile('./client/index.html', function(err, data) {
+      data = data.toString();
+      var headers = Object.assign({}, defaultCorsHeaders);
+      headers['Content-Type'] = 'text/html';
+      response.writeHead(200, headers);
+      response.end(data);
+    });
   }
   
   // Check endpoint and method 
@@ -28,19 +60,28 @@ var requestHandler = function(request, response) {
         if (err) {
           throw err;
         }
-        var results = JSON.parse(data);
+        var results;
+        if (data) {
+          results = JSON.parse(data.toString());
+        }
         response.writeHead(200, headers);
         response.end(JSON.stringify({ 'results': results.reverse() }));
       });
     // Post data to file and return results
     } else if (request.method === 'POST') {
       var messages;
-      var message;
+      var message = '';
+      // Collect data from stream
       request.on('data', (data) => {
-        message = JSON.parse(data);
+        message = message + data.toString();
+      });
+      // When data is ready, continue
+      request.on('end', (data) => {
+        message = JSON.parse(message);
         if (!message['roomname']) {
           message['roomname'] = undefined;
         }
+        // TODO: Add object id
         message['createdAt'] = new Date();
         // Push new data to results
         fs.readFile('messages.txt', (err, data) => {
@@ -58,13 +99,14 @@ var requestHandler = function(request, response) {
           });
         });
       });
+    // Respond with options
     } else if (request.method === 'OPTIONS') {
       response.writeHead(200, defaultCorsHeaders);
       response.end();
+    } else {
+      response.writeHead(404, headers);
+      response.end();
     }
-  } else {
-    response.writeHead(404, headers);
-    response.end();
   }
 
 
