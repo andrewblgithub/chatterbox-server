@@ -14,8 +14,7 @@
     "start:es6": "babel-node server/basic-server.js",
     "test": "mocha server/spec",
     "test:es6": "mocha --compilers js:babel-register server/spec",
-    "lint": "eslint ./",
-    "postinstall": "cd client && bower install && cd.."
+    "lint": "eslint ./"
   },
   "devDependencies": {
     "babel-cli": "^6.7.5",
@@ -31,5 +30,7 @@
       "es2015"
     ]
   },
-  "dependencies": {}
+  "dependencies": {
+    "bower": "1.8.2"
+  }
 }
