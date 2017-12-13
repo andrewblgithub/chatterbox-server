@@ -44,7 +44,7 @@ app.handleSubmit = () => {
 };
 
 app.createRoom = () => {
-  let room = document.getElementById('createroom').value;
+  let room = _.escape(document.getElementById('createroom').value);
   $('#createroom').val('');
   if (!app.rooms[room]) {
     app.renderRoom(room);
@@ -110,7 +110,7 @@ app.clearMessages = () => {
 app.renderMessage = (message) => {
   let username = _.escape(message.username);
   let text = _.escape(message.text);
-  let createdAt = message.createdAt;
+  let createdAt = message.createdAt.replace('Z', '').replace('T', ' ').slice(0, -4);
   
   $('#chats').prepend('<div class=\'panel panel-default\'><div class=\'panel-body\'>' +
   '<div class=\'username ' + 
@@ -127,6 +127,7 @@ app.renderMessage = (message) => {
 };
 
 app.renderRoom = (room) => {
+  room = _.escape(room);
   $('.dropdown-menu').append($('<li><a id=' + room + ' href="#" onclick=app.selectRoom(this.innerHTML)>' + room + '</a></li>'));
 };
 
